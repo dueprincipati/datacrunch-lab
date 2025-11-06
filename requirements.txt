@@ -1,0 +1,9 @@
+pandas
+scikit-learn
+lightgbm
+xgboost
+joblib
+seaborn
+crunchdao[1]
+notebook
+optuna
