@@ -96,8 +96,8 @@ if __name__ == "__main__":
     # We use only the first 2 moons for quick local testing
     # moon are sequential integers
     all_moons = X_train_full["moon"].unique()
-    moons_to_train = all_moons[:2]
-    moon_to_infer = all_moons[1]
+    moons_to_train = all_moons[:2] # first two moons for training
+    moon_to_infer = all_moons[2] # third moon for inference
 
     X_train_sample = X_train_full[X_train_full["moon"].isin(moons_to_train)]
     y_train_sample = y_train_full[y_train_full["moon"].isin(moons_to_train)]
