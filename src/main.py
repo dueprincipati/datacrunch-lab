@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 import joblib 
 from sklearn.linear_model import LinearRegression
 
@@ -16,7 +17,7 @@ def get_feature_names(X_data: pd.DataFrame) -> list:
     features = [col for col in X_data.columns if col.startswith("gordon_") or col.startswith("dolly_")]
     return features
 
-def train (Xtrain: pd.DataFrame, y_train: pd.DataFrame, model_directory_path: str):
+def train (X_train: pd.DataFrame, y_train: pd.DataFrame, model_directory_path: str):
     """
     Train a baseline model and save it to disk.
     based on the quickstarter architecture.
@@ -25,7 +26,7 @@ def train (Xtrain: pd.DataFrame, y_train: pd.DataFrame, model_directory_path: st
     print("Starting training baseline model...")
 
     # 1. feature selection
-    feature_names = get_feature_names(Xtrain)
+    feature_names = get_feature_names(X_train)
 
     # 2. to unify X and y for data matching
     train_data = pd.merge(X_train, y_train, on=["id", "moon"])
@@ -38,7 +39,7 @@ def train (Xtrain: pd.DataFrame, y_train: pd.DataFrame, model_directory_path: st
     y_target = train_data [TARGET_NAME]
 
     # 5. model training
-    model = LinearRegression() [2]
+    model = LinearRegression()
     model.fit(train_data[feature_names], y_target)
 
     # 6. save the model to disk
