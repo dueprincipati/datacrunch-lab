@@ -1,31 +1,37 @@
 import os
-import crunch
-import shutil
+import sys
 
 def download(api_key, download_path="data"):
     print("Inizializzazione download dati...")
     
-    # Setup della directory
+    # Assicura che la directory esista
     if not os.path.exists(download_path):
         os.makedirs(download_path)
     
-    # Inizializza client
-    client = crunch.Client(api_key=api_key)
-    
-    # Scarica i dati (X_train, y_train, X_test)
-    # Nota: Questo scaricherà i file parquet nella cartella corrente o specificata
     print(f"Scaricando i dati in {download_path}...")
     
-    # Esegue il comando di download della CLI tramite python
-    # Assicurati di avere l'API key corretta dalla piattaforma
-    os.system(f"crunch setup --token {api_key} --directory {download_path} --size large")
+    # SINTASSI CORRETTA:
+    # crunch setup [COMPETITION] [PROJECT_NAME] [DIRECTORY] --token [TOKEN] --size large
+    # competition: datacrunch
+    # project: submission (nome arbitrario per il setup locale)
+    # directory: path dove scaricare i dati
+    command = f"crunch setup datacrunch submission {download_path} --token {api_key} --size large --force"
     
-    print("Download completato.")
+    # Esegue il comando
+    exit_code = os.system(command)
+    
+    if exit_code == 0:
+        print("\n✅ Download completato con successo.")
+    else:
+        print("\n❌ Errore durante il download.")
 
 if __name__ == "__main__":
-    # Prende la chiave dalle variabili d'ambiente o input manuale
+    # Gestione input API Key (Priorità: Env Var -> Argomento -> Input manuale)
     API_KEY = os.getenv("CRUNCHDAO_API_KEY") 
     if not API_KEY:
-        API_KEY = input("Inserisci la tua API Key CrunchDAO: ")
+        if len(sys.argv) > 1:
+            API_KEY = sys.argv[1]
+        else:
+            API_KEY = input("Inserisci la tua (NUOVA) API Key CrunchDAO: ")
     
     download(API_KEY)
