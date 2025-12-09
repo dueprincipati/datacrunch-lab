@@ -8,7 +8,7 @@ def run_experiment():
         # Assumiamo che i dati siano stati scaricati in 'data/'
         X_train = pd.read_parquet("data/X_train.parquet")
         y_train = pd.read_parquet("data/y_train.parquet")
-        X_test = pd.read_parquet("data/X_test.parquet") # Usato come validation set qui
+        X_test = pd.read_parquet("data/X_test_reduced.parquet") # Usato come validation set qui
         # Per validare localmente ci serve y_test, che solitamente è una parte splittata di y_train
         # Simulo uno split temporale per il test
     except Exception as e:

@@ -1,41 +1,63 @@
 import pandas as pd
 import joblib
 import os
-from sklearn.linear_model import LinearRegression
+import lightgbm as lgb
 
 class NTargetModel:
-    def __init__(self, target_names, model_class=LinearRegression, model_params={}):
+    def __init__(self, target_names, model_params=None):
         self.target_names = target_names
         self.models = {}
-        self.model_class = model_class
-        self.model_params = model_params
+        
+        # Parametri ottimali da esperimenti: LightGBM (leaves=50)
+        if model_params is None:
+            self.model_params = {
+                "n_estimators": 150,
+                "num_leaves": 50,
+                "learning_rate": 0.05,
+                "random_state": 42,
+                "n_jobs": -1,
+                "verbose": -1
+            }
+        else:
+            self.model_params = model_params
 
     def train(self, X, y):
-        """Addestra un modello indipendente per ogni target."""
+        """Addestra un modello LightGBM per ogni target."""
         for target in self.target_names:
             if target in y.columns:
-                print(f"Training model for {target}...")
-                model = self.model_class(**self.model_params)
-                # Filtra righe dove il target è NaN
+                print(f"Training LightGBM for {target}...")
+                
+                # Inizializza il regressore LightGBM
+                model = lgb.LGBMRegressor(**self.model_params)
+                
                 valid_mask = y[target].notna()
-                model.fit(X[valid_mask], y.loc[valid_mask, target])
-                self.models[target] = model
+                if valid_mask.sum() > 0:
+                    model.fit(X[valid_mask], y.loc[valid_mask, target])
+                    self.models[target] = model
+                else:
+                    print(f"Warning: No valid data for {target}")
             else:
-                print(f"Warning: {target} not found in training labels.")
+                print(f"Warning: {target} not found.")
 
     def predict(self, X):
-        """Fa predizioni per tutti i target e restituisce la media (ensemble semplice)."""
+        """Fa predizioni per tutti i target e restituisce la media."""
+        if not self.models:
+            raise ValueError("Model not trained yet!")
+            
         predictions = pd.DataFrame(index=X.index)
         
         for target, model in self.models.items():
             predictions[target] = model.predict(X)
             
-        # Qui implementiamo la logica 'Ensemble': Media di tutti i target
-        # Spesso predire più target aiuta a stabilizzare il segnale
+        if predictions.empty:
+            return pd.Series(0, index=X.index)
+            
         return predictions.mean(axis=1)
 
-    def save(self, path):
+    def save(self, directory):
+        path = os.path.join(directory, "n_target_model.joblib")
         joblib.dump(self.models, path)
 
-    def load(self, path):
+    def load(self, directory):
+        path = os.path.join(directory, "n_target_model.joblib")
         self.models = joblib.load(path)
