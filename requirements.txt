@@ -1,9 +1,7 @@
 pandas
 scikit-learn
+joblib
+scipy
+crunch-cli
 lightgbm
 xgboost
-joblib
-seaborn
-crunchdao[1]
-notebook
-optuna
